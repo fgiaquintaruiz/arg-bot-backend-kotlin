@@ -1,0 +1,56 @@
+package com.argbot.infrastructure.web
+
+import com.argbot.domain.model.*
+import com.argbot.domain.port.input.GetMarketDataQuery
+import com.argbot.domain.port.input.GetMarketDataUseCase
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.post
+import java.math.BigDecimal
+
+// @WebMvcTest carga SOLO la capa web — no levanta el contexto completo de Spring.
+// Es rápido porque no inicializa base de datos, servicios ni adapters externos.
+@WebMvcTest(MarketDataController::class)
+class MarketDataControllerTest {
+
+    @Autowired lateinit var mockMvc: MockMvc
+    @MockkBean lateinit var getMarketData: GetMarketDataUseCase
+
+    private val defaultMarketData = MarketData(
+        balances     = BinanceBalance.empty(),
+        exchangeRate = ExchangeRate(BigDecimal("1.09")),
+        p2pRate      = P2PRate(BigDecimal("1200.00")),
+        withdrawalFee = WithdrawalFee.default()
+    )
+
+    @Test
+    fun `POST api-data sin body devuelve 200 con defaults`() {
+        every { getMarketData.execute(GetMarketDataQuery(null, null)) } returns defaultMarketData
+
+        mockMvc.post("/api/data") {
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.rate") { exists() }
+            jsonPath("$.balances.eur") { value("0") }
+        }
+    }
+
+    @Test
+    fun `POST api-data con credenciales las pasa al use case`() {
+        val query = GetMarketDataQuery("enc-key", "enc-secret")
+        every { getMarketData.execute(query) } returns defaultMarketData
+
+        mockMvc.post("/api/data") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"encKey":"enc-key","encSecret":"enc-secret"}"""
+        }.andExpect {
+            status { isOk() }
+        }
+    }
+}

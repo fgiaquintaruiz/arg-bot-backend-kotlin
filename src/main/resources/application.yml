@@ -1,0 +1,32 @@
+server:
+  port: 10007
+
+spring:
+  application:
+    name: arg-bot-backend
+
+crypto:
+  encryption-key: ${ENCRYPTION_KEY:dev-key-replace-in-prod}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      binance:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 2
+      criptoya:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 2

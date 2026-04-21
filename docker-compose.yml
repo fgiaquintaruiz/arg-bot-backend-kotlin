@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    ports:
+      - "10007:10007"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
