@@ -2,10 +2,12 @@ package com.argbot.infrastructure.binance
 
 import com.argbot.domain.model.ExchangeBalance
 import com.argbot.domain.model.ExchangeRate
+import com.argbot.domain.model.TradeOrder
 import com.argbot.domain.port.output.ExchangeRatePort
 import com.argbot.domain.port.output.SpotTradingPort
 import com.argbot.infrastructure.annotation.ExternalApiAdapter
 import com.argbot.infrastructure.binance.dto.BinanceAccountResponse
+import com.argbot.infrastructure.binance.dto.BinanceOrderResponse
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.springframework.web.client.RestClient
 import javax.crypto.Mac
@@ -39,6 +41,28 @@ class BinanceSpotAdapter(private val restClient: RestClient) : SpotTradingPort, 
             .retrieve()
             .body(Map::class.java)!!
         return ExchangeRate(BigDecimal(response["price"].toString()))
+    }
+
+    @CircuitBreaker(name = "binance")
+    override fun placeMarketOrder(
+        apiKey: String, apiSecret: String,
+        symbol: String, side: String, quantity: BigDecimal
+    ): TradeOrder {
+        val qs = "symbol=$symbol&side=$side&type=MARKET&quantity=$quantity&timestamp=${System.currentTimeMillis()}"
+        val signed = "$qs&signature=${sign(qs, apiSecret)}"
+        val response = restClient.post()
+            .uri("/api/v3/order?$signed")
+            .header("X-MBX-APIKEY", apiKey)
+            .body("")   // Binance recibe los params en query string — body vacío obligatorio en RestClient
+            .retrieve()
+            .body(BinanceOrderResponse::class.java)!!
+        return TradeOrder(
+            orderId            = response.orderId,
+            symbol             = response.symbol,
+            status             = response.status,
+            executedQty        = BigDecimal(response.executedQty),
+            cumulativeQuoteQty = BigDecimal(response.cummulativeQuoteQty)
+        )
     }
 
     private fun queryString() = "timestamp=${System.currentTimeMillis()}"

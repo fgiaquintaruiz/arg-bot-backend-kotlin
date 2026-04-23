@@ -1,7 +1,9 @@
 package com.argbot.infrastructure.binance
 
+import com.argbot.domain.model.Withdrawal
 import com.argbot.domain.model.WithdrawalFee
 import com.argbot.domain.port.output.CapitalPort
+import com.argbot.infrastructure.binance.dto.BinanceWithdrawResponse
 import com.argbot.infrastructure.annotation.ExternalApiAdapter
 import com.argbot.infrastructure.binance.dto.BinanceCoinConfig
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
@@ -30,6 +32,22 @@ class BinanceCapitalAdapter(private val restClient: RestClient) : CapitalPort {
             ?: WithdrawalFee.default().amount
 
         return WithdrawalFee(coin, network, fee)
+    }
+
+    @CircuitBreaker(name = "binance")
+    override fun submitWithdrawal(
+        apiKey: String, apiSecret: String,
+        address: String, amount: BigDecimal
+    ): Withdrawal {
+        val qs = "coin=USDC&network=BSC&address=$address&amount=$amount&timestamp=${System.currentTimeMillis()}"
+        val signed = "$qs&signature=${sign(qs, apiSecret)}"
+        val response = restClient.post()
+            .uri("/sapi/v1/capital/withdraw/apply?$signed")
+            .header("X-MBX-APIKEY", apiKey)
+            .body("")   // Binance recibe los params en query string — body vacío obligatorio en RestClient
+            .retrieve()
+            .body(BinanceWithdrawResponse::class.java)!!
+        return Withdrawal(id = response.id)
     }
 
     private fun queryString() = "timestamp=${System.currentTimeMillis()}"
