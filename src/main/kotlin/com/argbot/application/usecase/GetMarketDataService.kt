@@ -4,16 +4,18 @@ import com.argbot.application.annotation.UseCase
 import com.argbot.domain.model.*
 import com.argbot.domain.port.input.GetMarketDataQuery
 import com.argbot.domain.port.input.GetMarketDataUseCase
-import com.argbot.domain.port.output.BinancePort
+import com.argbot.domain.port.output.CapitalPort
 import com.argbot.domain.port.output.CryptoPort
 import com.argbot.domain.port.output.ExchangeRatePort
 import com.argbot.domain.port.output.P2PRatePort
+import com.argbot.domain.port.output.SpotTradingPort
 
 // @UseCase en vez de @Service — Screaming Architecture: el código grita lo que es.
 // Facade pattern: una interfaz simple (execute) sobre múltiples llamadas a adapters.
 @UseCase
 class GetMarketDataService(
-    private val binancePort: BinancePort,
+    private val spotTradingPort: SpotTradingPort,
+    private val capitalPort: CapitalPort,
     private val exchangeRatePort: ExchangeRatePort,
     private val p2pRatePort: P2PRatePort,
     private val cryptoPort: CryptoPort
@@ -37,17 +39,16 @@ class GetMarketDataService(
         )
     }
 
-    private fun resolveCredentials(query: GetMarketDataQuery): Pair<BinanceBalance, WithdrawalFee> {
-        if (!query.hasCredentials()) return BinanceBalance.empty() to WithdrawalFee.default()
+    private fun resolveCredentials(query: GetMarketDataQuery): Pair<ExchangeBalance, WithdrawalFee> {
+        if (!query.hasCredentials()) return ExchangeBalance.empty() to WithdrawalFee.default()
 
-        val apiKey = cryptoPort.decrypt(query.encryptedApiKey!!)
-            ?: return BinanceBalance.empty() to WithdrawalFee.default()
-        val apiSecret = cryptoPort.decrypt(query.encryptedApiSecret!!)
-            ?: return BinanceBalance.empty() to WithdrawalFee.default()
+        val apiKey    = cryptoPort.decrypt(query.encryptedApiKey!!)    ?: return ExchangeBalance.empty() to WithdrawalFee.default()
+        val apiSecret = cryptoPort.decrypt(query.encryptedApiSecret!!) ?: return ExchangeBalance.empty() to WithdrawalFee.default()
 
-        val balances = runCatching { binancePort.getBalances(apiKey, apiSecret) }
-            .getOrDefault(BinanceBalance.empty())
-        val fee = runCatching { binancePort.getWithdrawalFee(apiKey, apiSecret, "USDC", "BSC") }
+        val balances = runCatching { spotTradingPort.getBalances(apiKey, apiSecret) }
+            .getOrDefault(ExchangeBalance.empty())
+
+        val fee = runCatching { capitalPort.getWithdrawalFee(apiKey, apiSecret, "USDC", "BSC") }
             .getOrDefault(WithdrawalFee.default())
 
         return balances to fee

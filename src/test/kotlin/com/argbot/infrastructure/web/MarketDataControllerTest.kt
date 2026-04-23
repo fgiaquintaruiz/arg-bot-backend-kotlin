@@ -22,7 +22,7 @@ class MarketDataControllerTest {
     @MockkBean lateinit var getMarketData: GetMarketDataUseCase
 
     private val defaultMarketData = MarketData(
-        balances     = BinanceBalance.empty(),
+        balances     = ExchangeBalance.empty(),
         exchangeRate = ExchangeRate(BigDecimal("1.09")),
         p2pRate      = P2PRate(BigDecimal("1200.00")),
         withdrawalFee = WithdrawalFee.default()

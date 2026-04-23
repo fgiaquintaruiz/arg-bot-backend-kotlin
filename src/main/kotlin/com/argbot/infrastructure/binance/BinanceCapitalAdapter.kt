@@ -1,0 +1,42 @@
+package com.argbot.infrastructure.binance
+
+import com.argbot.domain.model.WithdrawalFee
+import com.argbot.domain.port.output.CapitalPort
+import com.argbot.infrastructure.annotation.ExternalApiAdapter
+import com.argbot.infrastructure.binance.dto.BinanceCoinConfig
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import org.springframework.web.client.RestClient
+import java.math.BigDecimal
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+
+// Adapter para endpoints /sapi — solo disponibles en producción, NO en testnet.
+// Si se necesita soporte testnet, inyectar un NoOpCapitalAdapter en su lugar.
+@ExternalApiAdapter
+class BinanceCapitalAdapter(private val restClient: RestClient) : CapitalPort {
+
+    @CircuitBreaker(name = "binance")
+    override fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String): WithdrawalFee {
+        val qs = queryString()
+        val configs = restClient.get()
+            .uri("/sapi/v1/capital/config/getall?$qs&signature=${sign(qs, apiSecret)}")
+            .header("X-MBX-APIKEY", apiKey)
+            .retrieve()
+            .body(Array<BinanceCoinConfig>::class.java)!!
+
+        val fee = configs.firstOrNull { it.coin == coin }
+            ?.networkList?.firstOrNull { it.network == network }
+            ?.withdrawFee?.let { BigDecimal(it) }
+            ?: WithdrawalFee.default().amount
+
+        return WithdrawalFee(coin, network, fee)
+    }
+
+    private fun queryString() = "timestamp=${System.currentTimeMillis()}"
+
+    private fun sign(queryString: String, secret: String): String {
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(secret.toByteArray(), "HmacSHA256"))
+        return mac.doFinal(queryString.toByteArray()).joinToString("") { "%02x".format(it) }
+    }
+}
