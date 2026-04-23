@@ -1,79 +1,178 @@
 {
   "info": {
-    "name": "Binance Testnet — ArgBot",
+    "_postman_id": "a10a18a4-9e2a-4501-a1b9-89b99d3b8cf2",
+    "name": "B Test",
+    "description": "Colección para probar la Binance Spot Testnet. Configura API_KEY y API_SECRET en las variables de la colección.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Colección para probar la Binance Spot Testnet. Configura API_KEY y API_SECRET en las variables de la colección."
+    "_exporter_id": "30484623"
   },
-  "variable": [
-    { "key": "BASE_URL",   "value": "https://testnet.binance.vision" },
-    { "key": "API_KEY",    "value": "PEGA_TU_API_KEY_AQUI" },
-    { "key": "API_SECRET", "value": "PEGA_TU_SECRET_KEY_AQUI" }
-  ],
   "item": [
     {
       "name": "1. Balances de cuenta",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ts = Date.now().toString();",
+              "const qs = 'timestamp=' + ts;",
+              "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
+              "pm.variables.set('timestamp', ts);",
+              "pm.variables.set('signature', sig);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
-        "header": [{ "key": "X-MBX-APIKEY", "value": "{{API_KEY}}" }],
+        "header": [
+          {
+            "key": "X-MBX-APIKEY",
+            "value": "{{API_KEY}}"
+          }
+        ],
         "url": {
           "raw": "{{BASE_URL}}/api/v3/account?timestamp={{timestamp}}&signature={{signature}}",
-          "host": ["{{BASE_URL}}"],
-          "path": ["api", "v3", "account"],
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v3",
+            "account"
+          ],
           "query": [
-            { "key": "timestamp",  "value": "{{timestamp}}" },
-            { "key": "signature",  "value": "{{signature}}" }
+            {
+              "key": "timestamp",
+              "value": "{{timestamp}}"
+            },
+            {
+              "key": "signature",
+              "value": "{{signature}}"
+            }
           ]
         }
       },
-      "event": [{ "listen": "prerequest", "script": { "exec": [
-        "const ts = Date.now().toString();",
-        "const qs = 'timestamp=' + ts;",
-        "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
-        "pm.variables.set('timestamp', ts);",
-        "pm.variables.set('signature', sig);"
-      ] } }]
+      "response": []
     },
     {
-      "name": "2. Precio EUR/USDT (sin firma)",
+      "name": "2. Precio EUR/USDC (sin firma)",
       "request": {
         "method": "GET",
+        "header": [],
         "url": {
-          "raw": "{{BASE_URL}}/api/v3/ticker/price?symbol=EURUSDT",
-          "host": ["{{BASE_URL}}"],
-          "path": ["api", "v3", "ticker", "price"],
-          "query": [{ "key": "symbol", "value": "EURUSDT" }]
-        }
-      }
-    },
-    {
-      "name": "3. Comprar USDT con BTC (market order)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "X-MBX-APIKEY", "value": "{{API_KEY}}" }],
-        "url": {
-          "raw": "{{BASE_URL}}/api/v3/order?symbol=BTCUSDT&side=SELL&type=MARKET&quantity=0.001&timestamp={{timestamp}}&signature={{signature}}",
-          "host": ["{{BASE_URL}}"],
-          "path": ["api", "v3", "order"],
+          "raw": "{{BASE_URL}}/api/v3/ticker/price?symbol=EURUSDC",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v3",
+            "ticker",
+            "price"
+          ],
           "query": [
-            { "key": "symbol",    "value": "BTCUSDT" },
-            { "key": "side",      "value": "SELL" },
-            { "key": "type",      "value": "MARKET" },
-            { "key": "quantity",  "value": "0.001" },
-            { "key": "timestamp", "value": "{{timestamp}}" },
-            { "key": "signature", "value": "{{signature}}" }
+            {
+              "key": "symbol",
+              "value": "EURUSDC"
+            }
           ]
         }
       },
-      "event": [{ "listen": "prerequest", "script": { "exec": [
-        "const ts = Date.now().toString();",
-        "const qs = 'symbol=BTCUSDT&side=SELL&type=MARKET&quantity=0.001&timestamp=' + ts;",
-        "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
-        "pm.variables.set('timestamp', ts);",
-        "pm.variables.set('signature', sig);"
-      ] } }]
+      "response": []
     },
     {
-      "name": "5. Comprar EUR con USDC (quoteOrderQty)",
+      "name": "3. Comprar USDC con BTC (market order)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ts = Date.now().toString();",
+              "const qs = 'symbol=BTCUSDC&side=SELL&type=MARKET&quantity=0.002&timestamp=' + ts;",
+              "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
+              "pm.variables.set('timestamp', ts);",
+              "pm.variables.set('signature', sig);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-MBX-APIKEY",
+            "value": "{{API_KEY}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/v3/order?symbol=BTCUSDC&side=SELL&type=MARKET&quantity=0.002&timestamp={{timestamp}}&signature={{signature}}",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v3",
+            "order"
+          ],
+          "query": [
+            {
+              "key": "symbol",
+              "value": "BTCUSDC"
+            },
+            {
+              "key": "side",
+              "value": "SELL"
+            },
+            {
+              "key": "type",
+              "value": "MARKET"
+            },
+            {
+              "key": "quantity",
+              "value": "0.002"
+            },
+            {
+              "key": "timestamp",
+              "value": "{{timestamp}}"
+            },
+            {
+              "key": "signature",
+              "value": "{{signature}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Comprar EUR con USDC",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ts = Date.now().toString();",
+              "const qs = 'symbol=EURUSDC&side=BUY&type=MARKET&quoteOrderQty=100&timestamp=' + ts;",
+              "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
+              "pm.variables.set('timestamp', ts);",
+              "pm.variables.set('signature', sig);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "X-MBX-APIKEY", "value": "{{API_KEY}}" }],
@@ -85,42 +184,76 @@
             { "key": "symbol",        "value": "EURUSDC" },
             { "key": "side",          "value": "BUY" },
             { "key": "type",          "value": "MARKET" },
-            { "key": "quoteOrderQty", "value": "100", "description": "USDC a gastar. Cambiá este valor según cuánto USDC querés convertir." },
+            { "key": "quoteOrderQty", "value": "100", "description": "USDC a gastar. Cambiá este valor." },
             { "key": "timestamp",     "value": "{{timestamp}}" },
             { "key": "signature",     "value": "{{signature}}" }
           ]
         }
       },
-      "event": [{ "listen": "prerequest", "script": { "exec": [
-        "const ts = Date.now().toString();",
-        "const qs = 'symbol=EURUSDC&side=BUY&type=MARKET&quoteOrderQty=100&timestamp=' + ts;",
-        "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
-        "pm.variables.set('timestamp', ts);",
-        "pm.variables.set('signature', sig);"
-      ] } }]
+      "response": []
     },
     {
       "name": "4. Mis ordenes activas",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ts = Date.now().toString();",
+              "const qs = 'timestamp=' + ts;",
+              "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
+              "pm.variables.set('timestamp', ts);",
+              "pm.variables.set('signature', sig);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
-        "header": [{ "key": "X-MBX-APIKEY", "value": "{{API_KEY}}" }],
+        "header": [
+          {
+            "key": "X-MBX-APIKEY",
+            "value": "{{API_KEY}}"
+          }
+        ],
         "url": {
           "raw": "{{BASE_URL}}/api/v3/openOrders?timestamp={{timestamp}}&signature={{signature}}",
-          "host": ["{{BASE_URL}}"],
-          "path": ["api", "v3", "openOrders"],
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v3",
+            "openOrders"
+          ],
           "query": [
-            { "key": "timestamp", "value": "{{timestamp}}" },
-            { "key": "signature", "value": "{{signature}}" }
+            {
+              "key": "timestamp",
+              "value": "{{timestamp}}"
+            },
+            {
+              "key": "signature",
+              "value": "{{signature}}"
+            }
           ]
         }
       },
-      "event": [{ "listen": "prerequest", "script": { "exec": [
-        "const ts = Date.now().toString();",
-        "const qs = 'timestamp=' + ts;",
-        "const sig = CryptoJS.HmacSHA256(qs, pm.collectionVariables.get('API_SECRET')).toString();",
-        "pm.variables.set('timestamp', ts);",
-        "pm.variables.set('signature', sig);"
-      ] } }]
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://testnet.binance.vision"
+    },
+    {
+      "key": "API_KEY",
+      "value": "PEGA_TU_API_KEY_AQUI"
+    },
+    {
+      "key": "API_SECRET",
+      "value": "PEGA_TU_SECRET_KEY_AQUI"
     }
   ]
 }
