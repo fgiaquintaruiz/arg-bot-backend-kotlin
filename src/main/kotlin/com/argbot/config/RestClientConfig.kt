@@ -1,5 +1,6 @@
 package com.argbot.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -11,8 +12,8 @@ import org.springframework.web.client.RestClient
 class RestClientConfig {
 
     @Bean
-    fun binanceRestClient(): RestClient = RestClient.builder()
-        .baseUrl("https://api.binance.com")
+    fun binanceRestClient(@Value("\${binance.base-url}") baseUrl: String): RestClient = RestClient.builder()
+        .baseUrl(baseUrl)
         .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
         .build()
 
