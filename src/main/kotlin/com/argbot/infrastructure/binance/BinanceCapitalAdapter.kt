@@ -1,4 +1,4 @@
-package com.argbot.infrastructure.binance
+﻿package com.argbot.infrastructure.binance
 
 import com.argbot.domain.model.Withdrawal
 import com.argbot.domain.model.WithdrawalFee
@@ -7,6 +7,7 @@ import com.argbot.infrastructure.binance.dto.BinanceWithdrawResponse
 import com.argbot.infrastructure.annotation.ExternalApiAdapter
 import com.argbot.infrastructure.binance.dto.BinanceCoinConfig
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.RestClient
 import java.math.BigDecimal
 import javax.crypto.Mac
@@ -15,7 +16,7 @@ import javax.crypto.spec.SecretKeySpec
 // Adapter para endpoints /sapi — solo disponibles en producción, NO en testnet.
 // Si se necesita soporte testnet, inyectar un NoOpCapitalAdapter en su lugar.
 @ExternalApiAdapter
-class BinanceCapitalAdapter(private val restClient: RestClient) : CapitalPort {
+class BinanceCapitalAdapter(@Qualifier("binanceRestClient") private val restClient: RestClient) : CapitalPort {
 
     @CircuitBreaker(name = "binance")
     override fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String): WithdrawalFee {

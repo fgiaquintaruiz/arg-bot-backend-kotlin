@@ -1,4 +1,4 @@
-package com.argbot.infrastructure.binance
+﻿package com.argbot.infrastructure.binance
 
 import com.argbot.domain.model.ExchangeBalance
 import com.argbot.domain.model.ExchangeRate
@@ -9,6 +9,7 @@ import com.argbot.infrastructure.annotation.ExternalApiAdapter
 import com.argbot.infrastructure.binance.dto.BinanceAccountResponse
 import com.argbot.infrastructure.binance.dto.BinanceOrderResponse
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.RestClient
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -18,7 +19,7 @@ import java.math.BigDecimal
 // Implementa SpotTradingPort (balances) + ExchangeRatePort (precio EUR/USDT).
 // Ambos usan /api, por eso viven en el mismo adapter.
 @ExternalApiAdapter
-class BinanceSpotAdapter(private val restClient: RestClient) : SpotTradingPort, ExchangeRatePort {
+class BinanceSpotAdapter(@Qualifier("binanceRestClient") private val restClient: RestClient) : SpotTradingPort, ExchangeRatePort {
 
     @CircuitBreaker(name = "binance")
     override fun getBalances(apiKey: String, apiSecret: String): ExchangeBalance {
