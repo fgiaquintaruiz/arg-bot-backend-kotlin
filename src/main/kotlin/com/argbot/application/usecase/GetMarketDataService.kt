@@ -31,10 +31,18 @@ class GetMarketDataService(
         val p2pRate = runCatching { p2pRatePort.getUsdcArsRate() }
             .getOrDefault(P2PRate.default())
 
+        val ripioRate = runCatching { p2pRatePort.getRipioUsdcArsRate() }
+            .getOrDefault(P2PRate.default())
+
+        val nexoRate = runCatching { p2pRatePort.getNexoUsdcArsRate() }
+            .getOrDefault(P2PRate.default())
+
         return MarketData(
             balances = balances,
             exchangeRate = exchangeRate,
             p2pRate = p2pRate,
+            ripioRate = ripioRate,
+            nexoRate = nexoRate,
             withdrawalFee = withdrawalFee
         )
     }

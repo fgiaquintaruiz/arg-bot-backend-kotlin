@@ -7,6 +7,8 @@ data class MarketDataResponse(
     val balances: BalancesDto,
     val rate: String,
     val usdcArsRate: String,
+    val ripioUsdcArsRate: String,
+    val nexoUsdcArsRate: String,
     val fees: FeesDto
 ) {
     companion object {
@@ -19,6 +21,8 @@ data class MarketDataResponse(
             ),
             rate = data.exchangeRate.eurUsdt.toPlainString(),
             usdcArsRate = data.p2pRate.usdcArs.toPlainString(),
+            ripioUsdcArsRate = data.ripioRate.usdcArs.toPlainString(),
+            nexoUsdcArsRate = data.nexoRate.usdcArs.toPlainString(),
             fees = FeesDto(
                 withdrawalUSDC_BEP20 = data.withdrawalFee.amount,
                 tradingRate = data.tradingFeeRate
