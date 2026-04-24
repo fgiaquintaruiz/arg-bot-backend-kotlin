@@ -1,4 +1,4 @@
-package com.argbot.infrastructure.web
+﻿package com.argbot.infrastructure.web
 
 import com.argbot.domain.model.*
 import com.argbot.domain.port.input.GetMarketDataQuery
@@ -22,9 +22,11 @@ class MarketDataControllerTest {
     @MockkBean lateinit var getMarketData: GetMarketDataUseCase
 
     private val defaultMarketData = MarketData(
-        balances     = ExchangeBalance.empty(),
-        exchangeRate = ExchangeRate(BigDecimal("1.09")),
-        p2pRate      = P2PRate(BigDecimal("1200.00")),
+        balances      = ExchangeBalance.empty(),
+        exchangeRate  = ExchangeRate(BigDecimal("1.09")),
+        p2pRate       = P2PRate(BigDecimal("1200.00")),
+        ripioRate     = P2PRate(BigDecimal("1200.00")),
+        nexoRate      = P2PRate(BigDecimal("1100.00")),
         withdrawalFee = WithdrawalFee.default()
     )
 
@@ -37,7 +39,9 @@ class MarketDataControllerTest {
         }.andExpect {
             status { isOk() }
             jsonPath("$.rate") { exists() }
-            jsonPath("$.balances.eur") { value("0") }
+            jsonPath("$.balances.eur") { value("0.00") }
+            jsonPath("$.ripioUsdcArsRate") { exists() }
+            jsonPath("$.nexoUsdcArsRate") { exists() }
         }
     }
 

@@ -29,6 +29,8 @@ class GetMarketDataServiceTest {
         val query = GetMarketDataQuery(null, null)
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate(BigDecimal("1.09"))
         every { p2pRatePort.getUsdcArsRate() }      returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getNexoUsdcArsRate()  } returns P2PRate(BigDecimal("1100.00"))
 
         val result = service.execute(query)
 
@@ -48,6 +50,8 @@ class GetMarketDataServiceTest {
         every { capitalPort.getWithdrawalFee("real-key", "real-secret", "USDC", "BSC") } returns WithdrawalFee.default()
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate.default()
         every { p2pRatePort.getUsdcArsRate() }      returns P2PRate.default()
+        every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getNexoUsdcArsRate()  } returns P2PRate(BigDecimal("1100.00"))
 
         val result = service.execute(query)
 
@@ -64,6 +68,8 @@ class GetMarketDataServiceTest {
         every { capitalPort.getWithdrawalFee(any(), any(), any(), any()) } throws RuntimeException()
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate(BigDecimal("1.09"))
         every { p2pRatePort.getUsdcArsRate() }      returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getNexoUsdcArsRate()  } returns P2PRate(BigDecimal("1100.00"))
 
         val result = service.execute(query)
 
@@ -77,6 +83,8 @@ class GetMarketDataServiceTest {
         every { cryptoPort.decrypt(any()) } returns null
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate.default()
         every { p2pRatePort.getUsdcArsRate() }      returns P2PRate.default()
+        every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getNexoUsdcArsRate()  } returns P2PRate(BigDecimal("1100.00"))
 
         val result = service.execute(query)
 
@@ -90,9 +98,24 @@ class GetMarketDataServiceTest {
         val query = GetMarketDataQuery(null, null)
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate.default()
         every { p2pRatePort.getUsdcArsRate() } throws RuntimeException("CriptoYa timeout")
+        every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
+        every { p2pRatePort.getNexoUsdcArsRate()  } returns P2PRate(BigDecimal("1100.00"))
 
         val result = service.execute(query)
 
         assertThat(result.p2pRate).isEqualTo(P2PRate.default())
+    }
+
+    @Test
+    fun `si Ripio falla usa tasa default`() {
+        val query = GetMarketDataQuery(null, null)
+        every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate.default()
+        every { p2pRatePort.getUsdcArsRate() }      returns P2PRate.default()
+        every { p2pRatePort.getRipioUsdcArsRate() } throws RuntimeException("Ripio timeout")
+        every { p2pRatePort.getNexoUsdcArsRate()  } returns P2PRate(BigDecimal("1100.00"))
+
+        val result = service.execute(query)
+
+        assertThat(result.ripioRate).isEqualTo(P2PRate.default())
     }
 }
