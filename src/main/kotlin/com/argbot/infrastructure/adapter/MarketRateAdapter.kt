@@ -3,8 +3,10 @@
 import com.argbot.domain.model.P2PRate
 import com.argbot.domain.port.output.P2PRatePort
 import com.argbot.infrastructure.annotation.ExternalApiAdapter
+import com.argbot.infrastructure.criptoya.dto.CriptoyaExchangeEntry
 import com.argbot.infrastructure.criptoya.dto.CriptoyaRateResponse
-import com.argbot.infrastructure.ripio.dto.RipioTickerResponse
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.RestClient
@@ -14,7 +16,7 @@ import java.math.RoundingMode
 @ExternalApiAdapter
 class MarketRateAdapter(
     @Qualifier("criptoyaRestClient") private val criptoyaClient: RestClient,
-    @Qualifier("ripioRestClient") private val ripioClient: RestClient
+    private val objectMapper: ObjectMapper
 ) : P2PRatePort {
 
     @CircuitBreaker(name = "criptoya")
@@ -35,13 +37,15 @@ class MarketRateAdapter(
         return P2PRate(BigDecimal(response.ask).setScale(2, RoundingMode.HALF_UP))
     }
 
-    @CircuitBreaker(name = "ripio")
+    @CircuitBreaker(name = "criptoya")
     override fun getRipioUsdcArsRate(): P2PRate {
-        val response = ripioClient.get()
-            .uri("/v4/public/tickers?pair=USDC_ARS")
+        val raw = criptoyaClient.get()
+            .uri("/api/usdc/ars/0.1")
             .retrieve()
-            .body(RipioTickerResponse::class.java)!!
-        val bid = response.data.firstOrNull { it.pair == "USDC_ARS" }?.bid ?: 0.0
-        return P2PRate(BigDecimal(bid).setScale(2, RoundingMode.HALF_UP))
+            .body(String::class.java)!!
+        val typeRef = object : TypeReference<Map<String, CriptoyaExchangeEntry>>() {}
+        val exchanges: Map<String, CriptoyaExchangeEntry> = objectMapper.readValue(raw, typeRef)
+        val bestBid = exchanges.values.maxOfOrNull { it.totalBid } ?: 0.0
+        return P2PRate(BigDecimal(bestBid).setScale(2, RoundingMode.HALF_UP))
     }
 }

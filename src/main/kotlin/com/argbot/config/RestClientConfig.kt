@@ -21,9 +21,4 @@ class RestClientConfig {
         .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
         .build()
 
-    @Bean
-    fun ripioRestClient(): RestClient = RestClient.builder()
-        .baseUrl("https://api.ripiotrade.co")
-        .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .build()
 }
