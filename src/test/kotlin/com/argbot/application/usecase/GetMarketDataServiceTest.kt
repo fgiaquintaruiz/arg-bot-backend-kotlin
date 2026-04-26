@@ -37,8 +37,8 @@ class GetMarketDataServiceTest {
         assertThat(result.balances).isEqualTo(ExchangeBalance.empty())
         assertThat(result.exchangeRate.eurUsdt).isEqualByComparingTo("1.09")
         assertThat(result.p2pRate.usdcArs).isEqualByComparingTo("1200.00")
-        verify(exactly = 0) { spotTradingPort.getBalances(any(), any()) }
-        verify(exactly = 0) { capitalPort.getWithdrawalFee(any(), any(), any(), any()) }
+        verify(exactly = 0) { spotTradingPort.getBalances(any(), any(), any()) }
+        verify(exactly = 0) { capitalPort.getWithdrawalFee(any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -46,8 +46,8 @@ class GetMarketDataServiceTest {
         val query = GetMarketDataQuery("enc-key", "enc-secret")
         every { cryptoPort.decrypt("enc-key")    } returns "real-key"
         every { cryptoPort.decrypt("enc-secret") } returns "real-secret"
-        every { spotTradingPort.getBalances("real-key", "real-secret") } returns ExchangeBalance.of(100.0, 50.0)
-        every { capitalPort.getWithdrawalFee("real-key", "real-secret", "USDC", "BSC") } returns WithdrawalFee.default()
+        every { spotTradingPort.getBalances("real-key", "real-secret", any()) } returns ExchangeBalance.of(100.0, 50.0)
+        every { capitalPort.getWithdrawalFee("real-key", "real-secret", "USDC", "BSC", any()) } returns WithdrawalFee.default()
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate.default()
         every { p2pRatePort.getUsdcArsRate() }      returns P2PRate.default()
         every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
@@ -64,8 +64,8 @@ class GetMarketDataServiceTest {
         val query = GetMarketDataQuery("enc-key", "enc-secret")
         every { cryptoPort.decrypt("enc-key")    } returns "real-key"
         every { cryptoPort.decrypt("enc-secret") } returns "real-secret"
-        every { spotTradingPort.getBalances(any(), any()) } throws RuntimeException("Binance timeout")
-        every { capitalPort.getWithdrawalFee(any(), any(), any(), any()) } throws RuntimeException()
+        every { spotTradingPort.getBalances(any(), any(), any()) } throws RuntimeException("Binance timeout")
+        every { capitalPort.getWithdrawalFee(any(), any(), any(), any(), any()) } throws RuntimeException()
         every { exchangeRatePort.getEurUsdtRate() } returns ExchangeRate(BigDecimal("1.09"))
         every { p2pRatePort.getUsdcArsRate() }      returns P2PRate(BigDecimal("1200.00"))
         every { p2pRatePort.getRipioUsdcArsRate() } returns P2PRate(BigDecimal("1200.00"))
@@ -89,8 +89,8 @@ class GetMarketDataServiceTest {
         val result = service.execute(query)
 
         assertThat(result.balances).isEqualTo(ExchangeBalance.empty())
-        verify(exactly = 0) { spotTradingPort.getBalances(any(), any()) }
-        verify(exactly = 0) { capitalPort.getWithdrawalFee(any(), any(), any(), any()) }
+        verify(exactly = 0) { spotTradingPort.getBalances(any(), any(), any()) }
+        verify(exactly = 0) { capitalPort.getWithdrawalFee(any(), any(), any(), any(), any()) }
     }
 
     @Test

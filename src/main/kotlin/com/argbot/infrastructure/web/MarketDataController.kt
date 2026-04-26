@@ -19,7 +19,8 @@ class MarketDataController(private val getMarketData: GetMarketDataUseCase) {
     fun getData(@RequestBody(required = false) request: MarketDataRequest?): MarketDataResponse {
         val query = GetMarketDataQuery(
             encryptedApiKey    = request?.encKey,
-            encryptedApiSecret = request?.encSecret
+            encryptedApiSecret = request?.encSecret,
+            testnet            = request?.testnet ?: true
         )
         return MarketDataResponse.from(getMarketData.execute(query))
     }

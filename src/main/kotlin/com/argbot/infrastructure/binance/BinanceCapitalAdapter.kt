@@ -14,12 +14,13 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 // Adapter para endpoints /sapi — solo disponibles en producción, NO en testnet.
-// Si se necesita soporte testnet, inyectar un NoOpCapitalAdapter en su lugar.
+// Cuando testnet=true, devuelve el fee default sin llamar a Binance.
 @ExternalApiAdapter
-class BinanceCapitalAdapter(@Qualifier("binanceRestClient") private val restClient: RestClient) : CapitalPort {
+class BinanceCapitalAdapter(@Qualifier("binanceProdRestClient") private val restClient: RestClient) : CapitalPort {
 
     @CircuitBreaker(name = "binance")
-    override fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String): WithdrawalFee {
+    override fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String, testnet: Boolean): WithdrawalFee {
+        if (testnet) return WithdrawalFee(coin, network, BigDecimal("0.8"))
         val qs = queryString()
         val configs = restClient.get()
             .uri("/sapi/v1/capital/config/getall?$qs&signature=${sign(qs, apiSecret)}")

@@ -8,6 +8,6 @@ import java.math.BigDecimal
 // Solo disponible en producción (endpoints /sapi de Binance).
 // En testnet, los adapters de este port no están disponibles.
 interface CapitalPort {
-    fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String): WithdrawalFee
+    fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String, testnet: Boolean = false): WithdrawalFee
     fun submitWithdrawal(apiKey: String, apiSecret: String, address: String, amount: BigDecimal): Withdrawal
 }

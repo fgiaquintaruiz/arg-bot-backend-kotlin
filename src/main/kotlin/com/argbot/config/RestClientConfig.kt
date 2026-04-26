@@ -10,8 +10,14 @@ import org.springframework.web.client.RestClient
 class RestClientConfig {
 
     @Bean
-    fun binanceRestClient(@Value("\${binance.base-url}") baseUrl: String): RestClient = RestClient.builder()
-        .baseUrl(baseUrl)
+    fun binanceProdRestClient(): RestClient = RestClient.builder()
+        .baseUrl("https://api.binance.com")
+        .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+        .build()
+
+    @Bean
+    fun binanceTestnetRestClient(): RestClient = RestClient.builder()
+        .baseUrl("https://testnet.binance.vision")
         .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
         .build()
 

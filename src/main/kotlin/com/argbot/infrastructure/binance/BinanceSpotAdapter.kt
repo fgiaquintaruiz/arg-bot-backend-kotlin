@@ -19,12 +19,17 @@ import java.math.BigDecimal
 // Implementa SpotTradingPort (balances) + ExchangeRatePort (precio EUR/USDT).
 // Ambos usan /api, por eso viven en el mismo adapter.
 @ExternalApiAdapter
-class BinanceSpotAdapter(@Qualifier("binanceRestClient") private val restClient: RestClient) : SpotTradingPort, ExchangeRatePort {
+class BinanceSpotAdapter(
+    @Qualifier("binanceProdRestClient")    private val prodRestClient: RestClient,
+    @Qualifier("binanceTestnetRestClient") private val testnetRestClient: RestClient
+) : SpotTradingPort, ExchangeRatePort {
+
+    private fun client(testnet: Boolean) = if (testnet) testnetRestClient else prodRestClient
 
     @CircuitBreaker(name = "binance")
-    override fun getBalances(apiKey: String, apiSecret: String): ExchangeBalance {
+    override fun getBalances(apiKey: String, apiSecret: String, testnet: Boolean): ExchangeBalance {
         val qs = queryString()
-        val response = restClient.get()
+        val response = client(testnet).get()
             .uri("/api/v3/account?$qs&signature=${sign(qs, apiSecret)}")
             .header("X-MBX-APIKEY", apiKey)
             .retrieve()
@@ -37,7 +42,7 @@ class BinanceSpotAdapter(@Qualifier("binanceRestClient") private val restClient:
 
     @CircuitBreaker(name = "binance")
     override fun getEurUsdtRate(): ExchangeRate {
-        val response = restClient.get()
+        val response = prodRestClient.get()
             .uri("/api/v3/ticker/price?symbol=EURUSDT")
             .retrieve()
             .body(Map::class.java)!!
@@ -51,7 +56,7 @@ class BinanceSpotAdapter(@Qualifier("binanceRestClient") private val restClient:
     ): TradeOrder {
         val qs = "symbol=$symbol&side=$side&type=MARKET&quantity=$quantity&timestamp=${System.currentTimeMillis()}"
         val signed = "$qs&signature=${sign(qs, apiSecret)}"
-        val response = restClient.post()
+        val response = prodRestClient.post()
             .uri("/api/v3/order?$signed")
             .header("X-MBX-APIKEY", apiKey)
             .body("")   // Binance recibe los params en query string — body vacío obligatorio en RestClient

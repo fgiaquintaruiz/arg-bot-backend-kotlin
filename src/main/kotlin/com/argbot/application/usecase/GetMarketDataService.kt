@@ -43,7 +43,8 @@ class GetMarketDataService(
             p2pRate = p2pRate,
             ripioRate = ripioRate,
             nexoRate = nexoRate,
-            withdrawalFee = withdrawalFee
+            withdrawalFee = withdrawalFee,
+            testnet = query.testnet
         )
     }
 
@@ -53,10 +54,10 @@ class GetMarketDataService(
         val apiKey    = cryptoPort.decrypt(query.encryptedApiKey!!)    ?: return ExchangeBalance.empty() to WithdrawalFee.default()
         val apiSecret = cryptoPort.decrypt(query.encryptedApiSecret!!) ?: return ExchangeBalance.empty() to WithdrawalFee.default()
 
-        val balances = runCatching { spotTradingPort.getBalances(apiKey, apiSecret) }
+        val balances = runCatching { spotTradingPort.getBalances(apiKey, apiSecret, query.testnet) }
             .getOrDefault(ExchangeBalance.empty())
 
-        val fee = runCatching { capitalPort.getWithdrawalFee(apiKey, apiSecret, "USDC", "BSC") }
+        val fee = runCatching { capitalPort.getWithdrawalFee(apiKey, apiSecret, "USDC", "BSC", query.testnet) }
             .getOrDefault(WithdrawalFee.default())
 
         return balances to fee

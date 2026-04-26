@@ -9,11 +9,10 @@ data class MarketDataResponse(
     val usdcArsRate: String,
     val ripioUsdcArsRate: String,
     val nexoUsdcArsRate: String,
-    val fees: FeesDto
+    val fees: FeesDto,
+    val testnet: Boolean
 ) {
     companion object {
-        // Mapper estático: transforma el modelo de dominio al contrato HTTP.
-        // El dominio NO sabe que existe HTTP — esta transformación vive en infra.
         fun from(data: MarketData) = MarketDataResponse(
             balances = BalancesDto(
                 eur  = data.balances.eur.toPlainString(),
@@ -26,7 +25,8 @@ data class MarketDataResponse(
             fees = FeesDto(
                 withdrawalUSDC_BEP20 = data.withdrawalFee.amount,
                 tradingRate = data.tradingFeeRate
-            )
+            ),
+            testnet = data.testnet
         )
     }
 }

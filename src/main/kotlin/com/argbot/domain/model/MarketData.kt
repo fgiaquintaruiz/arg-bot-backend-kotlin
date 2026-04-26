@@ -6,9 +6,10 @@ import java.math.BigDecimal
 data class MarketData(
     val balances: ExchangeBalance,
     val exchangeRate: ExchangeRate,
-    val p2pRate: P2PRate,             // Binance P2P (Criptoya)
-    val ripioRate: P2PRate,           // Ripio
-    val nexoRate: P2PRate,            // Nexo (via Criptoya)
+    val p2pRate: P2PRate,
+    val ripioRate: P2PRate,
+    val nexoRate: P2PRate,
     val withdrawalFee: WithdrawalFee,
-    val tradingFeeRate: BigDecimal = BigDecimal("0.001")
+    val tradingFeeRate: BigDecimal = BigDecimal("0.001"),
+    val testnet: Boolean = true
 )

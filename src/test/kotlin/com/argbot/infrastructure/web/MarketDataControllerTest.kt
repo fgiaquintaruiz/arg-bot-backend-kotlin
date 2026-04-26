@@ -32,7 +32,7 @@ class MarketDataControllerTest {
 
     @Test
     fun `POST api-data sin body devuelve 200 con defaults`() {
-        every { getMarketData.execute(GetMarketDataQuery(null, null)) } returns defaultMarketData
+        every { getMarketData.execute(GetMarketDataQuery(null, null, true)) } returns defaultMarketData
 
         mockMvc.post("/api/data") {
             contentType = MediaType.APPLICATION_JSON
@@ -47,7 +47,7 @@ class MarketDataControllerTest {
 
     @Test
     fun `POST api-data con credenciales las pasa al use case`() {
-        val query = GetMarketDataQuery("enc-key", "enc-secret")
+        val query = GetMarketDataQuery("enc-key", "enc-secret", true)
         every { getMarketData.execute(query) } returns defaultMarketData
 
         mockMvc.post("/api/data") {
