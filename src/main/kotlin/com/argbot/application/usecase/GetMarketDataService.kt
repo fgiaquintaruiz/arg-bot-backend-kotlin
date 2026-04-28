@@ -9,6 +9,7 @@ import com.argbot.domain.port.output.CryptoPort
 import com.argbot.domain.port.output.ExchangeRatePort
 import com.argbot.domain.port.output.P2PRatePort
 import com.argbot.domain.port.output.SpotTradingPort
+import org.slf4j.LoggerFactory
 
 // @UseCase en vez de @Service — Screaming Architecture: el código grita lo que es.
 // Facade pattern: una interfaz simple (execute) sobre múltiples llamadas a adapters.
@@ -20,6 +21,8 @@ class GetMarketDataService(
     private val p2pRatePort: P2PRatePort,
     private val cryptoPort: CryptoPort
 ) : GetMarketDataUseCase {
+
+    private val log = LoggerFactory.getLogger(GetMarketDataService::class.java)
 
     override fun execute(query: GetMarketDataQuery): MarketData {
         val (balances, withdrawalFee) = resolveCredentials(query)
@@ -49,17 +52,29 @@ class GetMarketDataService(
     }
 
     private fun resolveCredentials(query: GetMarketDataQuery): Pair<ExchangeBalance, WithdrawalFee> {
-        if (!query.hasCredentials()) return ExchangeBalance.empty() to WithdrawalFee.default()
+        if (!query.hasCredentials()) {
+            log.warn("No credentials in request — returning empty balance")
+            return ExchangeBalance.empty() to WithdrawalFee.default()
+        }
 
-        val apiKey    = cryptoPort.decrypt(query.encryptedApiKey!!)    ?: return ExchangeBalance.empty() to WithdrawalFee.default()
-        val apiSecret = cryptoPort.decrypt(query.encryptedApiSecret!!) ?: return ExchangeBalance.empty() to WithdrawalFee.default()
+        val apiKey = cryptoPort.decrypt(query.encryptedApiKey!!) ?: run {
+            log.error("Failed to decrypt apiKey — wrong CRYPTO_ENCRYPTION_KEY or corrupt ciphertext")
+            return ExchangeBalance.empty() to WithdrawalFee.default()
+        }
+        val apiSecret = cryptoPort.decrypt(query.encryptedApiSecret!!) ?: run {
+            log.error("Failed to decrypt apiSecret — wrong CRYPTO_ENCRYPTION_KEY or corrupt ciphertext")
+            return ExchangeBalance.empty() to WithdrawalFee.default()
+        }
 
         val balances = runCatching { spotTradingPort.getBalances(apiKey, apiSecret, query.testnet) }
+            .onFailure { log.error("getBalances failed (testnet={}): {}", query.testnet, it.message, it) }
             .getOrDefault(ExchangeBalance.empty())
 
         val fee = runCatching { capitalPort.getWithdrawalFee(apiKey, apiSecret, "USDC", "BSC", query.testnet) }
+            .onFailure { log.error("getWithdrawalFee failed: {}", it.message, it) }
             .getOrDefault(WithdrawalFee.default())
 
+        log.info("Balances resolved: eur={}, usdc={}", balances.eur, balances.usdc)
         return balances to fee
     }
 }

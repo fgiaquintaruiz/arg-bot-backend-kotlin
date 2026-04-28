@@ -57,4 +57,32 @@ class MarketDataControllerTest {
             status { isOk() }
         }
     }
+
+    @Test
+    fun `POST api-data acepta apiKey y apiSecret como aliases del frontend`() {
+        // Bug: el frontend enviaba apiKey/apiSecret pero el DTO esperaba encKey/encSecret
+        // Jackson no podía bindear los campos → credentials null → eur 0.00 siempre
+        val query = GetMarketDataQuery("enc-key", "enc-secret", true)
+        every { getMarketData.execute(query) } returns defaultMarketData
+
+        mockMvc.post("/api/data") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"apiKey":"enc-key","apiSecret":"enc-secret","testnet":true}"""
+        }.andExpect {
+            status { isOk() }
+        }
+    }
+
+    @Test
+    fun `POST api-data con testnet false pasa el flag correctamente al use case`() {
+        val query = GetMarketDataQuery("enc-key", "enc-secret", false)
+        every { getMarketData.execute(query) } returns defaultMarketData
+
+        mockMvc.post("/api/data") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"apiKey":"enc-key","apiSecret":"enc-secret","testnet":false}"""
+        }.andExpect {
+            status { isOk() }
+        }
+    }
 }
