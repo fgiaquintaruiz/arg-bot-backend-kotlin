@@ -1,4 +1,4 @@
-﻿package com.argbot.infrastructure.web
+package com.argbot.infrastructure.web
 
 import com.argbot.domain.model.*
 import com.argbot.domain.port.input.GetMarketDataQuery
@@ -47,12 +47,12 @@ class MarketDataControllerTest {
 
     @Test
     fun `POST api-data con credenciales las pasa al use case`() {
-        val query = GetMarketDataQuery("enc-key", "enc-secret", true)
+        val query = GetMarketDataQuery("plain-key", "plain-secret", true)
         every { getMarketData.execute(query) } returns defaultMarketData
 
         mockMvc.post("/api/data") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"encKey":"enc-key","encSecret":"enc-secret"}"""
+            content = """{"encKey":"plain-key","encSecret":"plain-secret"}"""
         }.andExpect {
             status { isOk() }
         }
@@ -60,14 +60,14 @@ class MarketDataControllerTest {
 
     @Test
     fun `POST api-data acepta apiKey y apiSecret como aliases del frontend`() {
-        // Bug: el frontend enviaba apiKey/apiSecret pero el DTO esperaba encKey/encSecret
-        // Jackson no podía bindear los campos → credentials null → eur 0.00 siempre
-        val query = GetMarketDataQuery("enc-key", "enc-secret", true)
+        // @JsonAlias acepta los nombres que el frontend envía (apiKey/apiSecret)
+        // además del nombre canónico (encKey/encSecret).
+        val query = GetMarketDataQuery("plain-key", "plain-secret", true)
         every { getMarketData.execute(query) } returns defaultMarketData
 
         mockMvc.post("/api/data") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"apiKey":"enc-key","apiSecret":"enc-secret","testnet":true}"""
+            content = """{"apiKey":"plain-key","apiSecret":"plain-secret","testnet":true}"""
         }.andExpect {
             status { isOk() }
         }
@@ -75,12 +75,12 @@ class MarketDataControllerTest {
 
     @Test
     fun `POST api-data con testnet false pasa el flag correctamente al use case`() {
-        val query = GetMarketDataQuery("enc-key", "enc-secret", false)
+        val query = GetMarketDataQuery("plain-key", "plain-secret", false)
         every { getMarketData.execute(query) } returns defaultMarketData
 
         mockMvc.post("/api/data") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"apiKey":"enc-key","apiSecret":"enc-secret","testnet":false}"""
+            content = """{"apiKey":"plain-key","apiSecret":"plain-secret","testnet":false}"""
         }.andExpect {
             status { isOk() }
         }

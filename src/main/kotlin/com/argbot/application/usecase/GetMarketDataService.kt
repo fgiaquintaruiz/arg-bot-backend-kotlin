@@ -5,7 +5,6 @@ import com.argbot.domain.model.*
 import com.argbot.domain.port.input.GetMarketDataQuery
 import com.argbot.domain.port.input.GetMarketDataUseCase
 import com.argbot.domain.port.output.CapitalPort
-import com.argbot.domain.port.output.CryptoPort
 import com.argbot.domain.port.output.ExchangeRatePort
 import com.argbot.domain.port.output.P2PRatePort
 import com.argbot.domain.port.output.SpotTradingPort
@@ -18,8 +17,7 @@ class GetMarketDataService(
     private val spotTradingPort: SpotTradingPort,
     private val capitalPort: CapitalPort,
     private val exchangeRatePort: ExchangeRatePort,
-    private val p2pRatePort: P2PRatePort,
-    private val cryptoPort: CryptoPort
+    private val p2pRatePort: P2PRatePort
 ) : GetMarketDataUseCase {
 
     private val log = LoggerFactory.getLogger(GetMarketDataService::class.java)
@@ -57,14 +55,8 @@ class GetMarketDataService(
             return ExchangeBalance.empty() to WithdrawalFee.default()
         }
 
-        val apiKey = cryptoPort.decrypt(query.encryptedApiKey!!) ?: run {
-            log.error("Failed to decrypt apiKey — wrong CRYPTO_ENCRYPTION_KEY or corrupt ciphertext")
-            return ExchangeBalance.empty() to WithdrawalFee.default()
-        }
-        val apiSecret = cryptoPort.decrypt(query.encryptedApiSecret!!) ?: run {
-            log.error("Failed to decrypt apiSecret — wrong CRYPTO_ENCRYPTION_KEY or corrupt ciphertext")
-            return ExchangeBalance.empty() to WithdrawalFee.default()
-        }
+        val apiKey    = query.apiKey!!
+        val apiSecret = query.apiSecret!!
 
         val balances = runCatching { spotTradingPort.getBalances(apiKey, apiSecret, query.testnet) }
             .onFailure { log.error("getBalances failed (testnet={}): {}", query.testnet, it.message, it) }

@@ -8,8 +8,8 @@ interface WithdrawUsdcUseCase {
 }
 
 data class WithdrawUsdcCommand(
-    val encryptedApiKey: String,
-    val encryptedApiSecret: String,
+    val apiKey: String,
+    val apiSecret: String,
     val address: String,
     val amountUsdc: BigDecimal
 )

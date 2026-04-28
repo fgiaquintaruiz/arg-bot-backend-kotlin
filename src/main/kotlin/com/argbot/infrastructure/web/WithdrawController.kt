@@ -19,10 +19,10 @@ class WithdrawController(private val withdrawUsdc: WithdrawUsdcUseCase) {
         return try {
             val withdrawal = withdrawUsdc.execute(
                 WithdrawUsdcCommand(
-                    encryptedApiKey    = request.encKey,
-                    encryptedApiSecret = request.encSecret,
-                    address            = request.address,
-                    amountUsdc         = request.amountUsdc
+                    apiKey    = request.encKey,
+                    apiSecret = request.encSecret,
+                    address   = request.address,
+                    amountUsdc = request.amountUsdc
                 )
             )
             ResponseEntity.ok(WithdrawResponse.from(withdrawal))

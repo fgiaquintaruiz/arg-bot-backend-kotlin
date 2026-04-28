@@ -19,9 +19,9 @@ class TradeController(private val executeTrade: ExecuteTradeUseCase) {
         return try {
             val order = executeTrade.execute(
                 ExecuteTradeCommand(
-                    encryptedApiKey    = request.encKey,
-                    encryptedApiSecret = request.encSecret,
-                    amountEur          = request.amountEur
+                    apiKey    = request.encKey,
+                    apiSecret = request.encSecret,
+                    amountEur = request.amountEur
                 )
             )
             ResponseEntity.ok(TradeResponse.from(order))

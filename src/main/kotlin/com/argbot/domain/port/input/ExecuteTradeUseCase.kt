@@ -8,7 +8,7 @@ interface ExecuteTradeUseCase {
 }
 
 data class ExecuteTradeCommand(
-    val encryptedApiKey: String,
-    val encryptedApiSecret: String,
+    val apiKey: String,
+    val apiSecret: String,
     val amountEur: BigDecimal
 )

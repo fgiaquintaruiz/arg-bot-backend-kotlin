@@ -9,9 +9,9 @@ interface GetMarketDataUseCase {
 }
 
 data class GetMarketDataQuery(
-    val encryptedApiKey: String?,
-    val encryptedApiSecret: String?,
+    val apiKey: String?,
+    val apiSecret: String?,
     val testnet: Boolean = true
 ) {
-    fun hasCredentials() = !encryptedApiKey.isNullOrBlank() && !encryptedApiSecret.isNullOrBlank()
+    fun hasCredentials() = !apiKey.isNullOrBlank() && !apiSecret.isNullOrBlank()
 }
