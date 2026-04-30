@@ -36,7 +36,7 @@ ARGBOT backend handles the server-side logic for automating cross-border transfe
 3. Withdraws USDC to a BSC wallet (BEP20)
 4. Exposes a REST API consumed by the ARGBOT frontend
 
-It acts as a secure intermediary: the frontend never touches Binance API keys directly — the backend decrypts them at runtime using a shared encryption key.
+It acts as a secure intermediary: the frontend passes Binance API keys to the backend, which uses them at runtime to call the Binance API.
 
 ---
 
@@ -104,7 +104,6 @@ The domain layer has zero dependencies on Spring or any external library. All ex
 | Variable                | Required | Description                                                                                   |
 |-------------------------|----------|-----------------------------------------------------------------------------------------------|
 | `PORT`                  | No       | Server port. Default: `10007` (local), overridden by Render in production                    |
-| `ENCRYPTION_KEY`        | Yes      | AES key used to decrypt Binance API keys at runtime. Must match `VITE_ENCRYPTION_KEY` in the frontend |
 | `SPRING_PROFILES_ACTIVE`| No       | Active profile: `prod`, `docker`, or `testnet`. Omit for local development                   |
 
 ---
