@@ -34,7 +34,7 @@ class MarketRateAdapter(
             .uri("/api/nexo/usdc/ars/0.1")
             .retrieve()
             .body(CriptoyaRateResponse::class.java)!!
-        return P2PRate(BigDecimal(response.ask).setScale(2, RoundingMode.HALF_UP))
+        return P2PRate(BigDecimal(response.bid).setScale(2, RoundingMode.HALF_UP))
     }
 
     @CircuitBreaker(name = "criptoya")
