@@ -4,6 +4,19 @@ server:
 spring:
   application:
     name: arg-bot-backend
+  datasource:
+    url: jdbc:h2:file:./data/argbot;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  h2:
+    console:
+      enabled: false
 
 crypto:
   encryption-key: ${ENCRYPTION_KEY:dev-key-replace-in-prod}
@@ -30,3 +43,15 @@ resilience4j:
         failure-rate-threshold: 50
         wait-duration-in-open-state: 30s
         permitted-number-of-calls-in-half-open-state: 2
+
+vapid:
+  public-key: ${VAPID_PUBLIC_KEY:}
+  private-key: ${VAPID_PRIVATE_KEY:}
+  subject: ${VAPID_SUBJECT:mailto:fgiaquintaruiz@gmail.com}
+
+binance:
+  api-key: ${BINANCE_API_KEY:}
+  api-secret: ${BINANCE_API_SECRET:}
+  deposit:
+    notify:
+      threshold: ${BINANCE_DEPOSIT_NOTIFY_THRESHOLD:1.0}
