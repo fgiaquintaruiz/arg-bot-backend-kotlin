@@ -1,0 +1,8 @@
+{
+  "name": "arg-bot-backend-kotlin",
+  "version": "1.0.2",
+  "type": "module",
+  "scripts": {
+    "push": "node scripts/push.mjs"
+  }
+}
