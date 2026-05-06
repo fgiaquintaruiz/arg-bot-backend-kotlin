@@ -6,5 +6,6 @@ import java.math.BigDecimal
 data class TradeRequest(
     @JsonAlias("apiKey")    val encKey: String,
     @JsonAlias("apiSecret") val encSecret: String,
-    val amountEur: BigDecimal
+    val amountEur: BigDecimal,
+    val testnet: Boolean = false
 )

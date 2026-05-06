@@ -21,7 +21,8 @@ class TradeController(private val executeTrade: ExecuteTradeUseCase) {
                 ExecuteTradeCommand(
                     apiKey    = request.encKey,
                     apiSecret = request.encSecret,
-                    amountEur = request.amountEur
+                    amountEur = request.amountEur,
+                    testnet   = request.testnet
                 )
             )
             ResponseEntity.ok(TradeResponse.from(order))

@@ -12,6 +12,6 @@ class ExecuteTradeService(
 ) : ExecuteTradeUseCase {
 
     override fun execute(command: ExecuteTradeCommand): TradeOrder {
-        return spotTradingPort.placeMarketOrder(command.apiKey, command.apiSecret, "EURUSDC", "SELL", command.amountEur)
+        return spotTradingPort.placeMarketOrder(command.apiKey, command.apiSecret, "EURUSDC", "SELL", command.amountEur, command.testnet)
     }
 }

@@ -10,5 +10,6 @@ interface ExecuteTradeUseCase {
 data class ExecuteTradeCommand(
     val apiKey: String,
     val apiSecret: String,
-    val amountEur: BigDecimal
+    val amountEur: BigDecimal,
+    val testnet: Boolean = false
 )

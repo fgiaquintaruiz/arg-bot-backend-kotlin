@@ -52,11 +52,11 @@ class BinanceSpotAdapter(
     @CircuitBreaker(name = "binance")
     override fun placeMarketOrder(
         apiKey: String, apiSecret: String,
-        symbol: String, side: String, quantity: BigDecimal
+        symbol: String, side: String, quantity: BigDecimal, testnet: Boolean
     ): TradeOrder {
         val qs = "symbol=$symbol&side=$side&type=MARKET&quantity=$quantity&timestamp=${System.currentTimeMillis()}"
         val signed = "$qs&signature=${sign(qs, apiSecret)}"
-        val response = prodRestClient.post()
+        val response = client(testnet).post()
             .uri("/api/v3/order?$signed")
             .header("X-MBX-APIKEY", apiKey)
             .body("")   // Binance recibe los params en query string — body vacío obligatorio en RestClient
