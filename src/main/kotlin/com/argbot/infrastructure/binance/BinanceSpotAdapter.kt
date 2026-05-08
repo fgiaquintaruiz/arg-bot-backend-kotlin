@@ -33,7 +33,8 @@ class BinanceSpotAdapter(
             .uri("/api/v3/account?$qs&signature=${sign(qs, apiSecret)}")
             .header("X-MBX-APIKEY", apiKey)
             .retrieve()
-            .body(BinanceAccountResponse::class.java)!!
+            .body(BinanceAccountResponse::class.java)
+            ?: throw BinanceApiException("getBalances: respuesta vacía de Binance")
 
         val usdc = response.balances.find { it.asset == "USDC" }?.free?.toDouble() ?: 0.0
         val eur  = response.balances.find { it.asset == "EUR"  }?.free?.toDouble() ?: 0.0
@@ -61,7 +62,8 @@ class BinanceSpotAdapter(
             .header("X-MBX-APIKEY", apiKey)
             .body("")   // Binance recibe los params en query string — body vacío obligatorio en RestClient
             .retrieve()
-            .body(BinanceOrderResponse::class.java)!!
+            .body(BinanceOrderResponse::class.java)
+            ?: throw BinanceApiException("placeMarketOrder: respuesta vacía de Binance")
         return TradeOrder(
             orderId            = response.orderId,
             symbol             = response.symbol,

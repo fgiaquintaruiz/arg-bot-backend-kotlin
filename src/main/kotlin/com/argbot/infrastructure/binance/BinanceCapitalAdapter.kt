@@ -26,7 +26,8 @@ class BinanceCapitalAdapter(@Qualifier("binanceProdRestClient") private val rest
             .uri("/sapi/v1/capital/config/getall?$qs&signature=${sign(qs, apiSecret)}")
             .header("X-MBX-APIKEY", apiKey)
             .retrieve()
-            .body(Array<BinanceCoinConfig>::class.java)!!
+            .body(Array<BinanceCoinConfig>::class.java)
+            ?: throw BinanceApiException("getWithdrawalFee: respuesta vacía de Binance")
 
         val fee = configs.firstOrNull { it.coin == coin }
             ?.networkList?.firstOrNull { it.network == network }
@@ -48,7 +49,9 @@ class BinanceCapitalAdapter(@Qualifier("binanceProdRestClient") private val rest
             .header("X-MBX-APIKEY", apiKey)
             .body("")   // Binance recibe los params en query string — body vacío obligatorio en RestClient
             .retrieve()
-            .body(BinanceWithdrawResponse::class.java)!!
+            .body(BinanceWithdrawResponse::class.java)
+            ?: throw BinanceApiException("submitWithdrawal: respuesta vacía de Binance")
+        if (response.id.isBlank()) throw BinanceApiException("submitWithdrawal: id vacío en respuesta de Binance")
         return Withdrawal(id = response.id)
     }
 
