@@ -159,6 +159,20 @@ class BinanceSpotAdapterErrorTest {
         }
     }
 
+    @Test
+    fun `should throw BinanceApiException when getEurUsdtRate returns null body`() {
+        val prodClient = mockRestClientGet(returnBody = null)
+        val testnetClient = org.springframework.web.client.RestClient.builder().build()
+        val adapter = BinanceSpotAdapter(prodClient, testnetClient)
+
+        val ex = assertThrows<BinanceApiException> {
+            adapter.getEurUsdtRate()
+        }
+        assert(ex.message?.contains("empty response body from getEurUsdtRate") == true) {
+            "Expected message to contain 'empty response body from getEurUsdtRate' but was: ${ex.message}"
+        }
+    }
+
     // ───────────── placeMarketOrder ─────────────
 
     @Test

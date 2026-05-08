@@ -46,7 +46,8 @@ class BinanceSpotAdapter(
         val response = prodRestClient.get()
             .uri("/api/v3/ticker/price?symbol=EURUSDT")
             .retrieve()
-            .body(Map::class.java)!!
+            .body(Map::class.java)
+            ?: throw BinanceApiException("empty response body from getEurUsdtRate")
         return ExchangeRate(BigDecimal(response["price"].toString()))
     }
 
