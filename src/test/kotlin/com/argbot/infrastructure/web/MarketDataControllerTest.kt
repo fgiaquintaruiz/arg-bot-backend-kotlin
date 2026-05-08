@@ -41,7 +41,7 @@ class MarketDataControllerTest {
             jsonPath("$.rate") { exists() }
             jsonPath("$.balances.eur") { value("0.00") }
             jsonPath("$.ripioUsdcArsRate") { exists() }
-            jsonPath("$.nexoUsdcArsRate") { exists() }
+            jsonPath("$.argCriptoBrokerUsdcArsRate") { exists() }
         }
     }
 
