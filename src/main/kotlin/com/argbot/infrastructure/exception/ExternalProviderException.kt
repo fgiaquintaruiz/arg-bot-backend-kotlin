@@ -1,6 +1,6 @@
 package com.argbot.infrastructure.exception
 
-sealed class ExternalProviderException(
+abstract class ExternalProviderException(
     message: String,
     val code: String,
     val userMessage: String,
