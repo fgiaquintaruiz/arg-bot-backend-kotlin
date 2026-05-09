@@ -1,5 +1,6 @@
 package com.argbot.infrastructure.binance
 
+import com.argbot.domain.model.WithdrawalFee
 import com.argbot.infrastructure.binance.dto.BinanceCoinConfig
 import com.argbot.infrastructure.binance.dto.BinanceNetwork
 import com.argbot.infrastructure.binance.dto.BinanceWithdrawResponse
@@ -29,7 +30,7 @@ class BinanceCapitalAdapterHappyPathTest {
 
         assertEquals("USDC",             result.coin)
         assertEquals("BSC",              result.network)
-        assertEquals(BigDecimal("0.8"),  result.amount)
+        assertEquals(WithdrawalFee.DEFAULT_AMOUNT, result.amount)
     }
 
     // ───────────── getWithdrawalFee — production paths ─────────────
@@ -125,6 +126,25 @@ class BinanceCapitalAdapterHappyPathTest {
         val result = adapter.getWithdrawalFee("key", "secret", "USDC", "BSC", testnet = false)
 
         assertEquals(BigDecimal("0.80"), result.amount)
+    }
+
+    // ───────────── WithdrawalFee scale regression ─────────────
+
+    @Test
+    fun `testnet_and_fallback_paths_produce_equal_fee_amounts`() {
+        // Regression guard: both paths must produce the same BigDecimal via equals() — not just compareTo().
+        // If anyone changes scale in one path only, this test will catch it.
+        val testnetAdapter = BinanceCapitalAdapter(mockRestClientGet(returnBody = null))
+        val testnetResult = testnetAdapter.getWithdrawalFee("key", "secret", "USDC", "BSC", testnet = true)
+
+        val fallbackConfigs = emptyArray<com.argbot.infrastructure.binance.dto.BinanceCoinConfig>()
+        val prodAdapter = BinanceCapitalAdapter(mockRestClientGet(returnBody = fallbackConfigs))
+        val fallbackResult = prodAdapter.getWithdrawalFee("key", "secret", "USDC", "BSC", testnet = false)
+
+        // equals() — not compareTo() — ensures scale is identical (0.80 == 0.80, not 0.8 != 0.80)
+        assertEquals(fallbackResult.amount, testnetResult.amount)
+        assertEquals(WithdrawalFee.DEFAULT_AMOUNT, testnetResult.amount)
+        assertEquals(WithdrawalFee.DEFAULT_AMOUNT, fallbackResult.amount)
     }
 
     // ───────────── submitWithdrawal — success path ─────────────

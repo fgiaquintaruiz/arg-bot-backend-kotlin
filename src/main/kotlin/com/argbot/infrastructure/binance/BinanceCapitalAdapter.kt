@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClient
 import java.math.BigDecimal
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import com.argbot.domain.model.WithdrawalFee.Companion.DEFAULT_AMOUNT
 
 // Adapter para endpoints /sapi — solo disponibles en producción, NO en testnet.
 // Cuando testnet=true, devuelve el fee default sin llamar a Binance.
@@ -20,7 +21,7 @@ class BinanceCapitalAdapter(@Qualifier("binanceProdRestClient") private val rest
 
     @CircuitBreaker(name = "binance")
     override fun getWithdrawalFee(apiKey: String, apiSecret: String, coin: String, network: String, testnet: Boolean): WithdrawalFee {
-        if (testnet) return WithdrawalFee(coin, network, BigDecimal("0.8"))
+        if (testnet) return WithdrawalFee(coin, network, DEFAULT_AMOUNT)
         val qs = queryString()
         val configs = restClient.get()
             .uri("/sapi/v1/capital/config/getall?$qs&signature=${sign(qs, apiSecret)}")
