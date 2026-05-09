@@ -33,6 +33,20 @@ class PushNotificationServiceTest {
     }
 
     @Test
+    fun `init does not throw when VAPID keys are blank`() {
+        // TODO: assert WARN log when log testing infrastructure is added to this repo
+        val service = PushNotificationService(
+            publicKey = "",
+            privateKey = "",
+            subject = "mailto:test@test.com",
+            subscriptionRepository = subscriptionRepository
+        )
+
+        // Must complete without throwing — pushService stays null, warn log is emitted
+        org.junit.jupiter.api.assertDoesNotThrow { service.init() }
+    }
+
+    @Test
     fun `sendToAll does nothing when VAPID keys not configured`() {
         val service = PushNotificationService(
             publicKey = "",
