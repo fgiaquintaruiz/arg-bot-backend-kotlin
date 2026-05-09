@@ -40,12 +40,12 @@ class MarketRateAdapter(
     }
 
     @CircuitBreaker(name = "criptoya")
-    override fun getRipioUsdcArsRate(): P2PRate {
+    override fun getArgCriptoBrokerUsdcArsRate(): P2PRate {
         val raw = criptoyaClient.get()
             .uri("/api/usdc/ars/0.1")
             .retrieve()
             .body(String::class.java)
-                ?: throw CriptoyaApiException("empty response body from getRipioUsdcArsRate")
+                ?: throw CriptoyaApiException("empty response body from getArgCriptoBrokerUsdcArsRate")
         val typeRef = object : TypeReference<Map<String, CriptoyaExchangeEntry>>() {}
         val exchanges: Map<String, CriptoyaExchangeEntry> = objectMapper.readValue(raw, typeRef)
         val bestBid = exchanges.values.maxOfOrNull { it.totalBid } ?: 0.0

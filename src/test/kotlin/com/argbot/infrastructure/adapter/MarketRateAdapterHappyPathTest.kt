@@ -65,10 +65,10 @@ class MarketRateAdapterHappyPathTest {
         assertEquals(BigDecimal("1400.00"), rate.usdcArs)
     }
 
-    // ───────────── getRipioUsdcArsRate (multi-exchange aggregation) ─────────────
+    // ───────────── getArgCriptoBrokerUsdcArsRate (multi-exchange aggregation) ─────────────
 
     @Test
-    fun `getRipioUsdcArsRate returns max totalBid across exchanges rounded HALF_UP scale 2`() {
+    fun `getArgCriptoBrokerUsdcArsRate returns max totalBid across exchanges rounded HALF_UP scale 2`() {
         val raw = """
             {
               "ripio":   {"totalAsk": 1300.0, "totalBid": 1280.50, "time": 1},
@@ -78,28 +78,28 @@ class MarketRateAdapterHappyPathTest {
         """.trimIndent()
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = raw), mapper)
 
-        val rate = adapter.getRipioUsdcArsRate()
+        val rate = adapter.getArgCriptoBrokerUsdcArsRate()
 
         // max totalBid across 3 exchanges = 1290.999 → HALF_UP scale 2 → 1291.00
         assertEquals(BigDecimal("1291.00"), rate.usdcArs)
     }
 
     @Test
-    fun `getRipioUsdcArsRate handles single exchange entry`() {
+    fun `getArgCriptoBrokerUsdcArsRate handles single exchange entry`() {
         val raw = """{"ripio": {"totalAsk": 1300.0, "totalBid": 1280.0, "time": 1}}"""
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = raw), mapper)
 
-        val rate = adapter.getRipioUsdcArsRate()
+        val rate = adapter.getArgCriptoBrokerUsdcArsRate()
 
         assertEquals(BigDecimal("1280.00"), rate.usdcArs)
     }
 
     @Test
-    fun `getRipioUsdcArsRate falls back to zero when exchanges map is empty`() {
+    fun `getArgCriptoBrokerUsdcArsRate falls back to zero when exchanges map is empty`() {
         val raw = "{}"
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = raw), mapper)
 
-        val rate = adapter.getRipioUsdcArsRate()
+        val rate = adapter.getArgCriptoBrokerUsdcArsRate()
 
         // Documents existing fallback: maxOfOrNull{...} ?: 0.0 → BigDecimal("0.0").setScale(2)
         // See bug list — silent fallback to zero is an issue, but test pins current behavior.

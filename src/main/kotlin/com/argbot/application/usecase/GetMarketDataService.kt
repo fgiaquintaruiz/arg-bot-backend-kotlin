@@ -32,7 +32,7 @@ class GetMarketDataService(
         val p2pRate = runCatching { p2pRatePort.getUsdcArsRate() }
             .getOrDefault(P2PRate.default())
 
-        val ripioRate = runCatching { p2pRatePort.getRipioUsdcArsRate() }
+        val ripioRate = runCatching { p2pRatePort.getArgCriptoBrokerUsdcArsRate() }
             .getOrDefault(P2PRate.default())
 
         val nexoRate = runCatching { p2pRatePort.getNexoUsdcArsRate() }

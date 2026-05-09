@@ -124,59 +124,59 @@ class MarketRateAdapterErrorTest {
         assertEquals("empty response body from getNexoUsdcArsRate", ex.message)
     }
 
-    // ───────────── getRipioUsdcArsRate ─────────────
+    // ───────────── getArgCriptoBrokerUsdcArsRate ─────────────
 
     @Test
-    fun `getRipioUsdcArsRate propagates HTTP 401 Unauthorized`() {
+    fun `getArgCriptoBrokerUsdcArsRate propagates HTTP 401 Unauthorized`() {
         val ex = HttpClientErrorException.create(
             HttpStatus.UNAUTHORIZED, "Unauthorized",
             org.springframework.http.HttpHeaders.EMPTY, ByteArray(0), null
         )
         val adapter = MarketRateAdapter(mockRestClientGet(throws = ex), mapper)
 
-        assertThrows<HttpClientErrorException.Unauthorized> { adapter.getRipioUsdcArsRate() }
+        assertThrows<HttpClientErrorException.Unauthorized> { adapter.getArgCriptoBrokerUsdcArsRate() }
     }
 
     @Test
-    fun `getRipioUsdcArsRate propagates HTTP 5xx server error`() {
+    fun `getArgCriptoBrokerUsdcArsRate propagates HTTP 5xx server error`() {
         val ex = HttpServerErrorException.create(
             HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable",
             org.springframework.http.HttpHeaders.EMPTY, ByteArray(0), null
         )
         val adapter = MarketRateAdapter(mockRestClientGet(throws = ex), mapper)
 
-        assertThrows<HttpServerErrorException> { adapter.getRipioUsdcArsRate() }
+        assertThrows<HttpServerErrorException> { adapter.getArgCriptoBrokerUsdcArsRate() }
     }
 
     @Test
-    fun `getRipioUsdcArsRate propagates ResourceAccessException on timeout`() {
+    fun `getArgCriptoBrokerUsdcArsRate propagates ResourceAccessException on timeout`() {
         val ex = ResourceAccessException("Connect timed out", SocketTimeoutException("timeout"))
         val adapter = MarketRateAdapter(mockRestClientGet(throws = ex), mapper)
 
-        assertThrows<ResourceAccessException> { adapter.getRipioUsdcArsRate() }
+        assertThrows<ResourceAccessException> { adapter.getArgCriptoBrokerUsdcArsRate() }
     }
 
     @Test
-    fun `getRipioUsdcArsRate propagates Jackson exception on malformed JSON body`() {
+    fun `getArgCriptoBrokerUsdcArsRate propagates Jackson exception on malformed JSON body`() {
         // String body returns OK, but objectMapper.readValue fails to deserialize.
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = "not-a-valid-json"), mapper)
 
-        assertThrows<Exception> { adapter.getRipioUsdcArsRate() }
+        assertThrows<Exception> { adapter.getArgCriptoBrokerUsdcArsRate() }
     }
 
     @Test
-    fun `getRipioUsdcArsRate throws Jackson MismatchedInputException on JSON-array body when Map expected`() {
+    fun `getArgCriptoBrokerUsdcArsRate throws Jackson MismatchedInputException on JSON-array body when Map expected`() {
         // Body is a JSON array, but readValue expects Map<String, CriptoyaExchangeEntry>.
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = "[]"), mapper)
 
-        assertThrows<MismatchedInputException> { adapter.getRipioUsdcArsRate() }
+        assertThrows<MismatchedInputException> { adapter.getArgCriptoBrokerUsdcArsRate() }
     }
 
     @Test
-    fun `getRipioUsdcArsRate throws CriptoyaApiException when body is null`() {
+    fun `getArgCriptoBrokerUsdcArsRate throws CriptoyaApiException when body is null`() {
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = null), mapper)
 
-        val ex = assertThrows<CriptoyaApiException> { adapter.getRipioUsdcArsRate() }
-        assertEquals("empty response body from getRipioUsdcArsRate", ex.message)
+        val ex = assertThrows<CriptoyaApiException> { adapter.getArgCriptoBrokerUsdcArsRate() }
+        assertEquals("empty response body from getArgCriptoBrokerUsdcArsRate", ex.message)
     }
 }
