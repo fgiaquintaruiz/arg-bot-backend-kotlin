@@ -7,15 +7,17 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.springframework.web.client.RestClient
 
 @ExternalApiAdapter
-class IpifyAdapter : PublicIpPort {
-    private val restClient = RestClient.builder().baseUrl("https://api.ipify.org").build()
+class IpifyAdapter(
+    private val restClient: RestClient = RestClient.builder().baseUrl("https://api.ipify.org").build()
+) : PublicIpPort {
 
     @CircuitBreaker(name = "ipify")
     override fun getIp(): PublicIp {
         val ip = restClient.get()
             .uri("/")
             .retrieve()
-            .body(String::class.java) ?: "unknown"
+            .body(String::class.java)
+                ?: throw IpifyApiException("empty response body from getIp")
         return PublicIp(ip)
     }
 }
