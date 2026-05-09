@@ -95,14 +95,13 @@ class MarketRateAdapterHappyPathTest {
     }
 
     @Test
-    fun `getArgCriptoBrokerUsdcArsRate falls back to zero when exchanges map is empty`() {
+    fun `getArgCriptoBrokerUsdcArsRate throws CriptoyaApiException when exchanges map is empty`() {
         val raw = "{}"
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = raw), mapper)
 
-        val rate = adapter.getArgCriptoBrokerUsdcArsRate()
-
-        // Documents existing fallback: maxOfOrNull{...} ?: 0.0 → BigDecimal("0.0").setScale(2)
-        // See bug list — silent fallback to zero is an issue, but test pins current behavior.
-        assertEquals(BigDecimal("0.00"), rate.usdcArs)
+        val ex = org.junit.jupiter.api.assertThrows<CriptoyaApiException> {
+            adapter.getArgCriptoBrokerUsdcArsRate()
+        }
+        assertEquals("no exchange rates available for USDC/ARS", ex.message)
     }
 }

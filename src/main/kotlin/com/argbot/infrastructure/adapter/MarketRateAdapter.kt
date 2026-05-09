@@ -48,7 +48,8 @@ class MarketRateAdapter(
                 ?: throw CriptoyaApiException("empty response body from getArgCriptoBrokerUsdcArsRate")
         val typeRef = object : TypeReference<Map<String, CriptoyaExchangeEntry>>() {}
         val exchanges: Map<String, CriptoyaExchangeEntry> = objectMapper.readValue(raw, typeRef)
-        val bestBid = exchanges.values.maxOfOrNull { it.totalBid } ?: 0.0
+        val bestBid = exchanges.values.maxOfOrNull { it.totalBid }
+            ?: throw CriptoyaApiException("no exchange rates available for USDC/ARS")
         return P2PRate(BigDecimal(bestBid).setScale(2, RoundingMode.HALF_UP))
     }
 }
