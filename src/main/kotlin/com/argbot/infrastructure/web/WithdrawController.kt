@@ -15,19 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 class WithdrawController(private val withdrawUsdc: WithdrawUsdcUseCase) {
 
     @PostMapping("/withdraw")
-    fun withdraw(@RequestBody request: WithdrawRequest): ResponseEntity<Any> {
-        return try {
-            val withdrawal = withdrawUsdc.execute(
-                WithdrawUsdcCommand(
-                    apiKey    = request.encKey,
-                    apiSecret = request.encSecret,
-                    address   = request.address,
-                    amountUsdc = request.amountUsdc
-                )
+    fun withdraw(@RequestBody request: WithdrawRequest): ResponseEntity<WithdrawResponse> {
+        val withdrawal = withdrawUsdc.execute(
+            WithdrawUsdcCommand(
+                apiKey     = request.encKey,
+                apiSecret  = request.encSecret,
+                address    = request.address,
+                amountUsdc = request.amountUsdc
             )
-            ResponseEntity.ok(WithdrawResponse.from(withdrawal))
-        } catch (e: Exception) {
-            ResponseEntity.badRequest().body(mapOf("error" to (e.message ?: "Fallo en el retiro")))
-        }
+        )
+        return ResponseEntity.ok(WithdrawResponse.from(withdrawal))
     }
 }

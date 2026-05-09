@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.post
 /**
  * Integration-style tests for TradeController endpoints.
  * BinanceErrorParser logic is tested separately in BinanceErrorParserTest.
+ * Exception-to-HTTP mapping is tested in GlobalExceptionHandlerTest.
  */
 @WebMvcTest(TradeController::class)
 class TradeControllerTest {
@@ -21,15 +22,15 @@ class TradeControllerTest {
     @MockkBean lateinit var executeTrade: ExecuteTradeUseCase
 
     @Test
-    fun `POST api-trade returns 400 when use case throws generic exception`() {
+    fun `POST api-trade returns 500 via advice when use case throws generic exception`() {
         every { executeTrade.execute(any()) } answers { throw RuntimeException("algo falló") }
 
         mockMvc.post("/api/trade") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"encKey":"k","encSecret":"s","amountEur":100,"testnet":false}"""
         }.andExpect {
-            status { isBadRequest() }
-            jsonPath("$.error") { value("algo falló") }
+            status { isInternalServerError() }
+            jsonPath("$.code") { value("INTERNAL_ERROR") }
         }
     }
 }
