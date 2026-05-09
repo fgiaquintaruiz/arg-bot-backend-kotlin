@@ -3,6 +3,7 @@ package com.argbot.infrastructure.adapter
 import com.argbot.infrastructure.binance.testsupport.mockRestClientGet
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
@@ -18,8 +19,7 @@ import java.net.SocketTimeoutException
  * Verifies that the adapter does NOT swallow HTTP/network/parsing exceptions —
  * each propagates as-is to the caller (consistent with binance adapters).
  *
- * Null-body cases produce raw NullPointerException due to the `body()!!` smell —
- * tracked in bug list (Tanda B1, fase 1, paso 2). Tests pin current behavior.
+ * Null-body cases throw CriptoyaApiException — fixed in B1.5 Bug #8.
  */
 class MarketRateAdapterErrorTest {
 
@@ -77,12 +77,11 @@ class MarketRateAdapterErrorTest {
     }
 
     @Test
-    fun `getUsdcArsRate throws NullPointerException when body is null (body double-bang smell)`() {
-        // Pins current behavior: body()!! produces raw NPE rather than a domain exception.
-        // See bug list entry MarketRateAdapter:27.
+    fun `getUsdcArsRate throws CriptoyaApiException when body is null`() {
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = null), mapper)
 
-        assertThrows<NullPointerException> { adapter.getUsdcArsRate() }
+        val ex = assertThrows<CriptoyaApiException> { adapter.getUsdcArsRate() }
+        assertEquals("empty response body from getUsdcArsRate", ex.message)
     }
 
     // ───────────── getNexoUsdcArsRate ─────────────
@@ -118,11 +117,11 @@ class MarketRateAdapterErrorTest {
     }
 
     @Test
-    fun `getNexoUsdcArsRate throws NullPointerException when body is null (body double-bang smell)`() {
-        // See bug list entry MarketRateAdapter:36.
+    fun `getNexoUsdcArsRate throws CriptoyaApiException when body is null`() {
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = null), mapper)
 
-        assertThrows<NullPointerException> { adapter.getNexoUsdcArsRate() }
+        val ex = assertThrows<CriptoyaApiException> { adapter.getNexoUsdcArsRate() }
+        assertEquals("empty response body from getNexoUsdcArsRate", ex.message)
     }
 
     // ───────────── getRipioUsdcArsRate ─────────────
@@ -174,10 +173,10 @@ class MarketRateAdapterErrorTest {
     }
 
     @Test
-    fun `getRipioUsdcArsRate throws NullPointerException when body is null (body double-bang smell)`() {
-        // See bug list entry MarketRateAdapter:45.
+    fun `getRipioUsdcArsRate throws CriptoyaApiException when body is null`() {
         val adapter = MarketRateAdapter(mockRestClientGet(returnBody = null), mapper)
 
-        assertThrows<NullPointerException> { adapter.getRipioUsdcArsRate() }
+        val ex = assertThrows<CriptoyaApiException> { adapter.getRipioUsdcArsRate() }
+        assertEquals("empty response body from getRipioUsdcArsRate", ex.message)
     }
 }

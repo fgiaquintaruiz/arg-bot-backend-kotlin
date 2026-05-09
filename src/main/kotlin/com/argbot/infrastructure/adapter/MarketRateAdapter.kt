@@ -24,7 +24,8 @@ class MarketRateAdapter(
         val response = criptoyaClient.get()
             .uri("/api/binancep2p/usdt/ars/0.1")
             .retrieve()
-            .body(CriptoyaRateResponse::class.java)!!
+            .body(CriptoyaRateResponse::class.java)
+                ?: throw CriptoyaApiException("empty response body from getUsdcArsRate")
         return P2PRate(BigDecimal(response.ask).setScale(2, RoundingMode.HALF_UP))
     }
 
@@ -33,7 +34,8 @@ class MarketRateAdapter(
         val response = criptoyaClient.get()
             .uri("/api/nexo/usdc/ars/0.1")
             .retrieve()
-            .body(CriptoyaRateResponse::class.java)!!
+            .body(CriptoyaRateResponse::class.java)
+                ?: throw CriptoyaApiException("empty response body from getNexoUsdcArsRate")
         return P2PRate(BigDecimal(response.bid).setScale(2, RoundingMode.HALF_UP))
     }
 
@@ -42,7 +44,8 @@ class MarketRateAdapter(
         val raw = criptoyaClient.get()
             .uri("/api/usdc/ars/0.1")
             .retrieve()
-            .body(String::class.java)!!
+            .body(String::class.java)
+                ?: throw CriptoyaApiException("empty response body from getRipioUsdcArsRate")
         val typeRef = object : TypeReference<Map<String, CriptoyaExchangeEntry>>() {}
         val exchanges: Map<String, CriptoyaExchangeEntry> = objectMapper.readValue(raw, typeRef)
         val bestBid = exchanges.values.maxOfOrNull { it.totalBid } ?: 0.0
